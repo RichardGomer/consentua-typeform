@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+ <head>
+   <meta charset="UTF-8">
+   <title>Consentua Typeform Example</title>
+
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+   <script src="https://embed.typeform.com/embed.js"></script>
+   <script src="https://websdk.consentua.com/websdk/consentua-embed.js.php"></script>
+
+   <style>
+   #ctform, #ctform > iframe {
+       height: 500px;
+   }
+   </style>
+ </head>
+ <body>
+
+ <div id="ctform">
+
+ </div>
+
+ <div id="ctconsent">
+     <iframe></iframe>
+ </div>
+
+ <div id="ctthanks">
+     <strong>Thanks, your submission has been sent.</strong>
+ </div>
+
+
+ <script type="text/javascript">
+  $().ready(function(){
+
+      var typeform = 'https://richardgomer.typeform.com/to/qculVo'; // URI of the typeform
+      var typeform_uid_field = 'consentua-uid'; // Name of the field in TypeForm that the Consentua UID should be put into
+
+      var cid = '2'; // Customer ID
+      var sid = '1'; // Consentua service ID
+      var tid = '1'; // Template ID
+      var uid = false; // Consentua User ID, for existing users
+
+      $('#ctconsent').css({visibility: 'hidden'}); // Hide the consent box, using visibility: rather than display: allows correct height-detection
+
+      $('#ctthanks').hide();
+
+      // 4: Give thanks
+      var cb_finished = function(foo){
+          console.log("Consent set", foo);
+          $('#ctthanks').html("Thanks, we've received your submission");
+      }
+
+      // 3: Get consent
+      var cb_getconsent = function(){
+          $('#ctform').hide();
+          $('#ctconsent').css({visibility: 'visible'}); // TODO: Make the transition nicer
+      }
+
+      // 2: Initialise and display the typeform
+      var cb_showform = function(msg){
+          console.log("Consentua Ready, initialise TypeForm");
+          var typeform_fields = typeform + '?' + typeform_uid_field + '=' + msg.message.uid;
+          typeformEmbed.makeWidget($('#ctform').get(0), typeform_fields, {onSubmit: cb_getconsent});
+      };
+
+      // 1: Initialise consentua, but hidden, we need the UID to give to typeform
+      // Make this a library method, which returns a deferred object, so we can reuse it later
+      var iframe = $('#ctconsent iframe').get(0);
+      var cwrapper = new ConsentuaEmbed({
+          iframe: iframe,
+          clientid: cid,
+          userid: uid,
+          templateid: tid,
+          serviceid: sid,
+          lang: 'en',
+          onset: cb_finished
+      });
+
+
+      cwrapper.onready = cb_showform;
+
+
+  });
+ </script>
+ </body>
+</html>
